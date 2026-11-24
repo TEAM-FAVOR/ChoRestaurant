@@ -16,7 +16,7 @@ try:
     from channels.routing import ProtocolTypeRouter, URLRouter
     from channels.security.websocket import AllowedHostsOriginValidator
 
-    websocket_urlpatterns: list = []
+    from apps.delivery.routing import websocket_urlpatterns
 
     application = ProtocolTypeRouter(
         {

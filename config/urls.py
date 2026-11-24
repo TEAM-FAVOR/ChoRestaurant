@@ -25,6 +25,13 @@ urlpatterns = [
     # Developer 1: Menu & Categories (web admin/catalog + API)
     path("menu/", include("apps.menu.urls", namespace="menu")),
     path("api/menu/", include("apps.menu.api_urls", namespace="menu-api")),
+    # Developer 4: Delivery pages and APIs (rider dashboard, live tracking)
+    path("delivery/", include("apps.delivery.urls", namespace="delivery")),
+    path("api/delivery/", include("apps.delivery.api_urls", namespace="delivery-api")),
+    path(
+        "api/notifications/",
+        include("apps.notifications.api_urls", namespace="notifications-api"),
+    ),
 ]
 
 if settings.DEBUG:

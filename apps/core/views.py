@@ -55,6 +55,9 @@ def api_root_view(request):
                 "menu_categories": request.build_absolute_uri(reverse("menu-api:category-list")),
                 "menu_items": request.build_absolute_uri(reverse("menu-api:fooditem-list")),
                 "menu_featured": request.build_absolute_uri(reverse("menu-api:featured-items")),
+                "deliveries": request.build_absolute_uri(reverse("delivery-api:delivery-list-create")),
+                "available_riders": request.build_absolute_uri(reverse("delivery-api:riders-available")),
+                "notifications": request.build_absolute_uri(reverse("notifications-api:notification-list")),
             },
         }
     )

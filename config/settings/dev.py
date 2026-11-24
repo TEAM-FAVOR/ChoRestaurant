@@ -34,12 +34,13 @@ if CLOUDINARY_URL and get_env_bool("USE_CLOUDINARY_IN_DEV", False):
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     }
 
-# Channel layers: In-memory fallback in dev when Redis isn't running
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
+# Redis is the default channel layer in development; opt into in-memory for isolated tests.
+if get_env_bool("USE_IN_MEMORY_CHANNEL_LAYER", False):
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
+        }
     }
-}
 
 # Email: Console backend for development
 EMAIL_BACKEND = os.environ.get(

@@ -1,0 +1,52 @@
+{% extends "rider/base.html" %}
+{% load static %}
+
+{% block title %}Rider Dashboard | Cho Restaurant{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <div class="panel-heading">
+    <div>
+      <h1>Rider dashboard</h1>
+      <p>Your assigned deliveries and live status.</p>
+    </div>
+    <div class="metrics">
+      <span class="metric"><strong>{{ active_deliveries|length }}</strong> Active</span>
+      <span class="metric"><strong>{{ completed_count }}</strong> Completed</span>
+    </div>
+  </div>
+
+  {% if deliveries %}
+    <div class="table-wrap">
+      <table class="delivery-table" data-rider-dashboard data-refresh-url="{% url 'delivery-api:delivery-list-create' %}?rider=me">
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Status</th>
+            <th>Destination</th>
+            <th>ETA</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for delivery in deliveries %}
+            <tr data-delivery-id="{{ delivery.pk }}" data-delivery-status="{{ delivery.status }}">
+              <td><strong>{{ delivery.order_reference }}</strong></td>
+              <td><span class="status status-{{ delivery.status|lower }}">{{ delivery.get_status_display }}</span></td>
+              <td>{{ delivery.destination_address|default:"Coordinates on file" }}</td>
+              <td data-eta>{{ delivery.eta_minutes|default:"—" }}{% if delivery.eta_minutes %} min{% endif %}</td>
+              <td><a class="button" href="{% url 'delivery:rider-delivery-detail' delivery.pk %}">Open</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="empty">No deliveries have been assigned to you yet.</p>
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/rider/dashboard.js' %}"></script>
+{% endblock %}

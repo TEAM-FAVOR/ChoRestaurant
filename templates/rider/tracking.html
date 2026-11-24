@@ -1,0 +1,51 @@
+{% extends "rider/base.html" %}
+{% load static %}
+
+{% block title %}Track order {{ delivery.order_reference }} | Cho Restaurant{% endblock %}
+
+{% block content %}
+<section
+  class="panel tracking-panel"
+  data-tracking-map
+  data-mode="customer"
+  data-delivery-id="{{ delivery.pk }}"
+  data-order-reference="{{ delivery.order_reference }}"
+  data-destination-lat="{{ delivery.destination_lat|default_if_none:'' }}"
+  data-destination-lng="{{ delivery.destination_lng|default_if_none:'' }}"
+  data-rider-lat="{{ delivery.current_lat|default_if_none:'' }}"
+  data-rider-lng="{{ delivery.current_lng|default_if_none:'' }}"
+  data-track-url="{% url 'delivery-api:delivery-track' delivery.order_reference %}"
+>
+  <div class="panel-heading">
+    <div>
+      <h1>Track order {{ delivery.order_reference }}</h1>
+      <p>{{ delivery.destination_address|default:"Delivery in progress" }}</p>
+    </div>
+    <span class="status status-{{ delivery.status|lower }}" data-status-badge>{{ delivery.get_status_display }}</span>
+  </div>
+
+  <div class="tracking-grid">
+    <div class="map-card">
+      <div id="delivery-map" class="map"></div>
+    </div>
+    <aside class="side-card">
+      <h2>Delivery details</h2>
+      <dl class="detail-list">
+        <dt>ETA</dt>
+        <dd data-eta>{{ delivery.eta_minutes|default:"—" }}{% if delivery.eta_minutes %} min{% endif %}</dd>
+        <dt>Rider</dt>
+        <dd>{% if delivery.rider %}{{ delivery.rider.user.get_full_name|default:delivery.rider.user.username }}{% else %}Assigning{% endif %}</dd>
+        <dt>Vehicle</dt>
+        <dd>{% if delivery.rider %}{{ delivery.rider.get_vehicle_type_display }}{% else %}—{% endif %}</dd>
+        <dt>Plate</dt>
+        <dd>{% if delivery.rider.plate_number %}{{ delivery.rider.plate_number }}{% else %}—{% endif %}</dd>
+      </dl>
+      <p class="notice">Live location is shared only while your rider is actively delivering your order.</p>
+    </aside>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/rider/tracking.js' %}"></script>
+{% endblock %}

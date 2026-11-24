@@ -1,0 +1,70 @@
+{% extends "rider/base.html" %}
+{% load static %}
+
+{% block title %}Delivery {{ delivery.order_reference }} | Cho Restaurant{% endblock %}
+
+{% block content %}
+<section
+  class="panel tracking-panel"
+  data-tracking-map
+  data-mode="rider"
+  data-delivery-id="{{ delivery.pk }}"
+  data-order-reference="{{ delivery.order_reference }}"
+  data-destination-lat="{{ delivery.destination_lat|default_if_none:'' }}"
+  data-destination-lng="{{ delivery.destination_lng|default_if_none:'' }}"
+  data-rider-lat="{{ delivery.current_lat|default_if_none:'' }}"
+  data-rider-lng="{{ delivery.current_lng|default_if_none:'' }}"
+  data-detail-url="{% url 'delivery-api:delivery-detail' delivery.pk %}"
+  data-status-url="{% url 'delivery-api:delivery-status' delivery.pk %}"
+  data-location-url="{% url 'delivery-api:delivery-location' delivery.pk %}"
+>
+  <div class="panel-heading">
+    <div>
+      <h1>Order {{ delivery.order_reference }}</h1>
+      <p>{{ delivery.destination_address|default:"Destination coordinates on file" }}</p>
+    </div>
+    <span class="status status-{{ delivery.status|lower }}" data-status-badge>{{ delivery.get_status_display }}</span>
+  </div>
+
+  <div class="tracking-grid">
+    <div class="map-card">
+      <div id="delivery-map" class="map"></div>
+    </div>
+    <aside class="side-card">
+      <h2>Live delivery</h2>
+      <dl class="detail-list">
+        <dt>ETA</dt>
+        <dd data-eta>{{ delivery.eta_minutes|default:"—" }}{% if delivery.eta_minutes %} min{% endif %}</dd>
+        <dt>Distance</dt>
+        <dd>{{ delivery.distance_km|default:"—" }}{% if delivery.distance_km %} km{% endif %}</dd>
+        <dt>GPS sharing</dt>
+        <dd data-gps-state>{% if delivery.rider.location_consent %}Enabled{% else %}Disabled{% endif %}</dd>
+      </dl>
+
+      <div class="actions">
+        {% if "IN_TRANSIT" in delivery.allowed_statuses %}
+          <button type="button" class="button primary" data-update-status="IN_TRANSIT">Start delivery</button>
+        {% endif %}
+        {% if "DELIVERED" in delivery.allowed_statuses %}
+          <button type="button" class="button primary" data-update-status="DELIVERED">Mark delivered</button>
+        {% endif %}
+        {% if "FAILED" in delivery.allowed_statuses %}
+          <button type="button" class="button danger" data-update-status="FAILED">Mark failed</button>
+        {% endif %}
+        {% if "CANCELLED" in delivery.allowed_statuses %}
+          <button type="button" class="button danger" data-update-status="CANCELLED">Cancel delivery</button>
+        {% endif %}
+      </div>
+
+      {% if not delivery.rider.location_consent %}
+        <p class="notice">Enable GPS consent in your rider profile before sharing your location.</p>
+      {% endif %}
+      <p class="notice" data-gps-error hidden></p>
+    </aside>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/rider/tracking.js' %}"></script>
+{% endblock %}

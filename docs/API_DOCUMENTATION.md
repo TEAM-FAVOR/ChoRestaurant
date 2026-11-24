@@ -165,3 +165,19 @@ Public endpoint returning active special meals and daily offers (`is_featured=Tr
 ### Restaurant Settings & Maps Facade (`apps.core.models` & `apps.core.maps`)
 - `RestaurantSettings.get_solo()`: Returns the cached singleton containing restaurant GPS origin (`origin_latitude`, `origin_longitude`), currency (`GHS`), and delivery fee configuration (`delivery_fee_mode`, `flat_delivery_fee`, `base_delivery_fee`, `base_distance_km`, `per_km_fee`, `max_delivery_radius_km`, `free_delivery_threshold`).
 - `MapsFacade.evaluate_destination(dest_lat, dest_lng)`: Computes Haversine distance from the restaurant origin, checks `within_delivery_radius`, and estimates travel time in minutes.
+
+---
+
+## 6. Delivery, Tracking & Notifications (Developer 4)
+
+Delivery, rider management, GPS, WebSocket and notification contracts are documented in
+[`docs/DEV4_EVENT_CONTRACT.md`](DEV4_EVENT_CONTRACT.md).
+
+Key routes:
+
+- `GET/POST /api/delivery/` — list/assign deliveries.
+- `POST /api/delivery/<id>/status/` — rider/staff delivery status update.
+- `POST /api/delivery/<id>/location/` — consent-checked GPS ping.
+- `GET /api/delivery/track/<order_reference>/` — customer tracking snapshot.
+- `GET /api/notifications/` and `GET /api/notifications/unread-count/`.
+- `WS /ws/orders/<reference>/`, `WS /ws/delivery/<id>/`, `WS /ws/notifications/`.

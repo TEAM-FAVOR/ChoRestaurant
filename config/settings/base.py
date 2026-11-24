@@ -84,6 +84,7 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    "channels",
     "rest_framework",
 ]
 
@@ -101,7 +102,7 @@ LOCAL_APPS = [
     "apps.dashboard.apps.DashboardConfig",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+INSTALLED_APPS = ["daphne"] + DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 # Custom User Model (CRITICAL: Must be defined before first migration)
 AUTH_USER_MODEL = "accounts.User"
@@ -234,6 +235,32 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_ALWAYS_EAGER = get_env_bool("CELERY_TASK_ALWAYS_EAGER", False)
+CELERY_TASK_EAGER_PROPAGATES = get_env_bool("CELERY_TASK_EAGER_PROPAGATES", False)
+CELERY_BEAT_SCHEDULE = {
+    "prune-rider-locations-hourly": {
+        "task": "delivery.prune_rider_locations",
+        "schedule": 3600.0,
+    },
+}
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [REDIS_URL],
+            "capacity": 100,
+            "expiry": 10,
+        },
+    }
+}
+
+GPS_MIN_INTERVAL_SECONDS = int(os.environ.get("GPS_MIN_INTERVAL_SECONDS", "2"))
+LOCATION_HISTORY_RETENTION_MINUTES = int(
+    os.environ.get("LOCATION_HISTORY_RETENTION_MINUTES", "60")
+)
+RIDER_LOCATION_STALE_MINUTES = int(os.environ.get("RIDER_LOCATION_STALE_MINUTES", "15"))
+NOTIFICATION_SMS_GATEWAY_URL = os.environ.get("NOTIFICATION_SMS_GATEWAY_URL", "")
 
 # -----------------------------------------------------------------------------
 # Paystack & Email Configuration
