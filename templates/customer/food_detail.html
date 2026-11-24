@@ -1,0 +1,141 @@
+{% extends 'customer/base.html' %}
+{% load static %}
+
+{% block title %}{{ food_item.name }} — {{ RESTAURANT_NAME|default:'Cho Restaurant' }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 3rem 1.5rem 5rem;">
+
+  <!-- Breadcrumbs -->
+  <div style="font-size: 0.85rem; color: var(--color-text-subtle); margin-bottom: 2rem;">
+    <a href="/" style="color: var(--color-text-muted);">Home</a>
+    <span style="margin: 0 0.4rem;">/</span>
+    <a href="{% url 'menu:menu-list' %}" style="color: var(--color-text-muted);">Menu</a>
+    <span style="margin: 0 0.4rem;">/</span>
+    <span style="color: var(--color-text-main); font-weight: 600;">{{ food_item.name }}</span>
+  </div>
+
+  <!-- Editorial 2-Column Detail Layout -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; align-items: start; margin-bottom: 4.5rem;">
+    
+    <!-- Left: Large Food Visual Frame -->
+    <div>
+      <div style="border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--color-border); box-shadow: var(--shadow-md); background: #1E1916;">
+        {% if "jollof" in food_item.slug %}
+          <img src="{% static 'img/dishes/jollof.svg' %}" alt="{{ food_item.name }}" style="width: 100%; height: 440px; object-fit: cover;" />
+        {% elif "tilapia" in food_item.slug or "banku" in food_item.slug %}
+          <img src="{% static 'img/dishes/tilapia.svg' %}" alt="{{ food_item.name }}" style="width: 100%; height: 440px; object-fit: cover;" />
+        {% elif "waakye" in food_item.slug %}
+          <img src="{% static 'img/dishes/waakye.svg' %}" alt="{{ food_item.name }}" style="width: 100%; height: 440px; object-fit: cover;" />
+        {% elif "kelewele" in food_item.slug %}
+          <img src="{% static 'img/dishes/kelewele.svg' %}" alt="{{ food_item.name }}" style="width: 100%; height: 440px; object-fit: cover;" />
+        {% elif "sobolo" in food_item.slug or "juice" in food_item.slug %}
+          <img src="{% static 'img/dishes/sobolo.svg' %}" alt="{{ food_item.name }}" style="width: 100%; height: 440px; object-fit: cover;" />
+        {% elif food_item.image %}
+          <img src="{{ food_item.image.url }}" alt="{{ food_item.name }}" style="width: 100%; height: 440px; object-fit: cover;" onerror="this.src='{% static 'img/dishes/default-dish.svg' %}'" />
+        {% else %}
+          <img src="{% static 'img/dishes/default-dish.svg' %}" alt="{{ food_item.name }}" style="width: 100%; height: 440px; object-fit: cover;" />
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right: Editorial Detail Information -->
+    <div class="food-detail-actions">
+      <div style="font-size: 0.825rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-primary); margin-bottom: 0.5rem;">
+        {{ food_item.category.name }} &bull; {{ food_item.prep_time_minutes|default:20 }} mins prep
+      </div>
+
+      <h1 style="font-family: var(--font-family-display); font-size: clamp(2.2rem, 3.8vw, 3rem); line-height: 1.15; margin-bottom: 0.75rem;">
+        {{ food_item.name }}
+      </h1>
+
+      <div style="font-family: var(--font-family-display); font-size: 2rem; font-weight: 800; color: var(--color-text-main); margin-bottom: 1.5rem;">
+        {{ CURRENCY_SYMBOL|default:'GH₵' }} {{ food_item.price }}
+      </div>
+
+      <p style="font-size: 1.05rem; color: var(--color-text-muted); line-height: 1.65; margin-bottom: 2rem;">
+        {{ food_item.description|default:"Cooked fresh to order using authentic seasonings and prime local produce. Served piping hot in heat-sealed containers." }}
+      </p>
+
+      <!-- Special Kitchen Instructions -->
+      <div class="form-group" style="margin-bottom: 1.75rem;">
+        <label for="kitchenInstructions" class="form-label" style="font-weight: 600;">
+          Special Instructions for Kitchen (Optional)
+        </label>
+        <textarea id="kitchenInstructions" class="form-control" rows="2" placeholder="e.g. Extra shito pepper, less spicy, separate sauce..."></textarea>
+      </div>
+
+      <!-- Quantity Stepper & Actions -->
+      <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <div class="qty-stepper">
+          <button type="button" class="qty-btn qty-btn-minus" aria-label="Decrease quantity">-</button>
+          <input type="text" id="detailQtyInput" class="qty-input" value="1" readonly />
+          <button type="button" class="qty-btn qty-btn-plus" aria-label="Increase quantity">+</button>
+        </div>
+
+        {% if food_item.is_available %}
+          <button type="button" class="btn btn-primary btn-lg btn-add-to-cart"
+            style="flex: 1;"
+            data-id="{{ food_item.id }}"
+            data-name="{{ food_item.name }}"
+            data-price="{{ food_item.price }}"
+            data-category="{{ food_item.category.name }}"
+            data-prep="{{ food_item.prep_time_minutes }} mins"
+            {% if "jollof" in food_item.slug %}data-image="{% static 'img/dishes/jollof.svg' %}"
+            {% elif "tilapia" in food_item.slug %}data-image="{% static 'img/dishes/tilapia.svg' %}"
+            {% elif "waakye" in food_item.slug %}data-image="{% static 'img/dishes/waakye.svg' %}"
+            {% elif "kelewele" in food_item.slug %}data-image="{% static 'img/dishes/kelewele.svg' %}"
+            {% elif "sobolo" in food_item.slug %}data-image="{% static 'img/dishes/sobolo.svg' %}"
+            {% elif food_item.image %}data-image="{{ food_item.image.url }}"
+            {% else %}data-image="{% static 'img/dishes/default-dish.svg' %}"
+            {% endif %}>
+            Add to Order
+          </button>
+
+          <a href="/checkout/" id="btnBuyNow" class="btn btn-secondary btn-lg">
+            Checkout Now
+          </a>
+        {% else %}
+          <button type="button" class="btn btn-outline btn-lg" disabled style="flex: 1; opacity: 0.5;">
+            Sold Out for Today
+          </button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Punchy Diner Feedback Section -->
+  <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 2.25rem;">
+    <h3 style="font-family: var(--font-family-display); font-size: 1.5rem; margin-bottom: 0.5rem;">Diner Reviews</h3>
+    <p style="font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 1.5rem;">Verified customer reviews from delivered orders.</p>
+
+    <div style="border-top: 1px solid var(--color-border-hairline); padding-top: 1.25rem;">
+      <p style="font-family: var(--font-family-display); font-style: italic; font-size: 1.05rem; line-height: 1.55; margin-bottom: 0.5rem;">
+        &ldquo;The portion size was generous, the seasonings were on point, and the meal arrived piping hot.&rdquo;
+      </p>
+      <div style="font-size: 0.825rem; font-weight: 700; color: var(--color-text-muted);">
+        Verified Diner &bull; Accra Delivery
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  document.getElementById('btnBuyNow')?.addEventListener('click', function(e) {
+    const addBtn = document.querySelector('.btn-add-to-cart');
+    if (addBtn && window.ChoCart) {
+      const id = addBtn.getAttribute('data-id');
+      const name = addBtn.getAttribute('data-name');
+      const price = addBtn.getAttribute('data-price');
+      const image = addBtn.getAttribute('data-image');
+      const category = addBtn.getAttribute('data-category');
+      const prep = addBtn.getAttribute('data-prep');
+      const qty = parseInt(document.getElementById('detailQtyInput')?.value, 10) || 1;
+      const notes = document.getElementById('kitchenInstructions')?.value || '';
+
+      window.ChoCart.addItem({ id, name, price, image, category, prep_time: prep }, qty, notes);
+    }
+  });
+</script>
+{% endblock %}

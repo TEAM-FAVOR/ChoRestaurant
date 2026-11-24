@@ -1,0 +1,363 @@
+{% extends 'customer/base.html' %}
+{% load static %}
+
+{% block title %}Checkout — {{ RESTAURANT_NAME|default:'Cho Restaurant' }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 3rem 1.5rem 5rem;">
+
+  <!-- Breadcrumbs -->
+  <div style="font-size: 0.85rem; color: var(--color-text-subtle); margin-bottom: 2rem;">
+    <a href="/" style="color: var(--color-text-muted);">Home</a>
+    <span style="margin: 0 0.4rem;">/</span>
+    <a href="/cart/" style="color: var(--color-text-muted);">Cart</a>
+    <span style="margin: 0 0.4rem;">/</span>
+    <span style="color: var(--color-text-main); font-weight: 600;">Checkout</span>
+  </div>
+
+  <h1 style="font-family: var(--font-family-display); font-size: clamp(2.2rem, 3.8vw, 2.8rem); margin-bottom: 0.5rem;">
+    Delivery &amp; Checkout
+  </h1>
+  <p style="font-size: 1.05rem; color: var(--color-text-muted); margin-bottom: 2.5rem;">
+    Confirm your delivery destination in Accra and select your payment method.
+  </p>
+
+  <div class="checkout-grid" id="checkoutGrid">
+    
+    <!-- Left: Step-by-Step Checkout Cards -->
+    <div>
+      <form id="checkoutForm" onsubmit="event.preventDefault(); window.handleCheckoutSubmit();">
+        {% csrf_token %}
+
+        <!-- STEP 1: Customer Contact -->
+        <div class="checkout-step-card" style="padding: 1.75rem; margin-bottom: 1.75rem;">
+          <div style="display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 1.25rem;">
+            <span style="font-family: var(--font-family-display); font-size: 1.4rem; color: var(--color-accent); font-weight: 800;">01</span>
+            <h3 style="font-family: var(--font-family-display); font-size: 1.35rem; font-weight: 700;">Customer Contact</h3>
+          </div>
+
+          {% if user.is_authenticated %}
+            <div style="background: var(--color-surface-warm); border-radius: var(--radius-sm); padding: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+              <div>
+                <div style="font-weight: 700; font-size: 1rem;">{{ user.get_full_name|default:user.username }}</div>
+                <div style="font-size: 0.85rem; color: var(--color-text-muted);">{{ user.email }} &bull; {{ user.phone|default:"+233 24 000 0004" }}</div>
+              </div>
+              <span style="font-size: 0.8rem; font-weight: 700; color: var(--color-secondary);">
+                ✓ Verified Account
+              </span>
+            </div>
+            <input type="hidden" id="custName" value="{{ user.get_full_name|default:user.username }}" />
+            <input type="hidden" id="custEmail" value="{{ user.email }}" />
+            <input type="hidden" id="custPhone" value="{{ user.phone|default:'+233240000004' }}" />
+          {% else %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="custName" class="form-label">Full Name *</label>
+                <input type="text" id="custName" class="form-control" placeholder="e.g. Akua Asante" required />
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="custPhone" class="form-label">Phone Number *</label>
+                <input type="tel" id="custPhone" class="form-control" placeholder="+233 24 000 0000" required />
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="custEmail" class="form-label">Email Address *</label>
+              <input type="email" id="custEmail" class="form-control" placeholder="you@example.com" required />
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- STEP 2: Delivery Address Selection -->
+        <div class="checkout-step-card" style="padding: 1.75rem; margin-bottom: 1.75rem;">
+          <div style="display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 1.25rem;">
+            <span style="font-family: var(--font-family-display); font-size: 1.4rem; color: var(--color-accent); font-weight: 800;">02</span>
+            <h3 style="font-family: var(--font-family-display); font-size: 1.35rem; font-weight: 700;">Delivery Address in Accra</h3>
+          </div>
+
+          <div class="saved-addresses-grid" id="savedAddressesGrid">
+            {% if addresses %}
+              {% for addr in addresses %}
+                <label class="address-choice-card {% if addr.is_default or forloop.first %}selected{% endif %}" onclick="selectAddressCard(this, '{{ addr.id }}', '{{ addr.line1 }}, {{ addr.city }}')">
+                  <input type="radio" name="address_id" value="{{ addr.id }}" {% if addr.is_default or forloop.first %}checked{% endif %} />
+                  <div style="font-size: 0.825rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.2rem;">
+                    📍 {{ addr.label|default:'Destination' }}
+                  </div>
+                  <div style="font-size: 0.875rem; font-weight: 600; line-height: 1.3;">
+                    {{ addr.line1 }}
+                  </div>
+                  <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.25rem;">
+                    {{ addr.city }}, {{ addr.state }}
+                  </div>
+                </label>
+              {% endfor %}
+            {% else %}
+              <label class="address-choice-card selected" onclick="selectAddressCard(this, 'default', '14 Independence Avenue, Ridge, Accra')">
+                <input type="radio" name="address_id" value="default" checked />
+                <div style="font-size: 0.825rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.2rem;">
+                  📍 Primary Address
+                </div>
+                <div style="font-size: 0.875rem; font-weight: 600;">
+                  14 Independence Avenue, Ridge
+                </div>
+                <div style="font-size: 0.8rem; color: var(--color-text-muted);">
+                  Accra, Greater Accra
+                </div>
+              </label>
+            {% endif %}
+          </div>
+
+          <div style="margin-top: 1rem;">
+            <button type="button" class="btn btn-outline btn-sm" id="btnToggleNewAddress">
+              + Deliver to a Different Address
+            </button>
+          </div>
+
+          <!-- New Address Form (Collapsible) -->
+          <div id="newAddressForm" style="display: none; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px dashed var(--color-border);">
+            <div class="form-group">
+              <label class="form-label">Street Address / Landmark *</label>
+              <input type="text" id="newAddrLine1" class="form-control" placeholder="e.g. Ring Road Central, Near Ridge Hospital" />
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label">City *</label>
+                <input type="text" id="newAddrCity" class="form-control" value="Accra" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Region *</label>
+                <input type="text" id="newAddrState" class="form-control" value="Greater Accra" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3: Special Delivery Instructions -->
+        <div class="checkout-step-card" style="padding: 1.75rem; margin-bottom: 1.75rem;">
+          <div style="display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 1.25rem;">
+            <span style="font-family: var(--font-family-display); font-size: 1.4rem; color: var(--color-accent); font-weight: 800;">03</span>
+            <h3 style="font-family: var(--font-family-display); font-size: 1.35rem; font-weight: 700;">Driver &amp; Kitchen Notes</h3>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <textarea id="deliveryNotes" class="form-control" rows="2" placeholder="e.g. Gate code or directions for dispatch rider..."></textarea>
+          </div>
+        </div>
+
+        <!-- STEP 4: Payment Choice -->
+        <div class="checkout-step-card" style="padding: 1.75rem;">
+          <div style="display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 1.25rem;">
+            <span style="font-family: var(--font-family-display); font-size: 1.4rem; color: var(--color-accent); font-weight: 800;">04</span>
+            <h3 style="font-family: var(--font-family-display); font-size: 1.35rem; font-weight: 700;">Payment Choice</h3>
+          </div>
+
+          <div class="payment-methods-grid">
+            <label class="payment-choice-card selected" onclick="selectPaymentChoice(this, 'PAYSTACK')">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 700; color: var(--color-text-main);">Paystack Online</span>
+                <input type="radio" name="payment_method" value="PAYSTACK" checked />
+              </div>
+              <p style="font-size: 0.8rem; color: var(--color-text-muted); margin: 0;">
+                Mobile Money (MTN, Telecel, AT) or Visa / Mastercard.
+              </p>
+            </label>
+
+            <label class="payment-choice-card" onclick="selectPaymentChoice(this, 'CASH')">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 700; color: var(--color-text-main);">Cash on Delivery</span>
+                <input type="radio" name="payment_method" value="CASH" />
+              </div>
+              <p style="font-size: 0.8rem; color: var(--color-text-muted); margin: 0;">
+                Hand exact cash to the dispatch rider upon arrival.
+              </p>
+            </label>
+          </div>
+        </div>
+
+        <input type="hidden" id="selectedAddressText" value="14 Independence Avenue, Ridge, Accra" />
+      </form>
+    </div>
+
+    <!-- Right: Sticky Order Summary & Submit -->
+    <div>
+      <div class="order-summary-card">
+        <h3 class="order-summary-title">Order Review</h3>
+
+        <div id="checkoutItemsList" style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.25rem; max-height: 260px; overflow-y: auto;">
+          <!-- Dynamically populated -->
+        </div>
+
+        <div style="border-top: 1px solid var(--color-border); padding-top: 1rem;">
+          <div class="summary-line">
+            <span>Subtotal</span>
+            <span id="coSubtotal" style="font-weight: 700;">{{ CURRENCY_SYMBOL|default:'GH₵' }} 0.00</span>
+          </div>
+
+          <div class="summary-line" id="coDiscountLine" style="display: none; color: var(--color-primary);">
+            <span>Discount</span>
+            <span id="coDiscount" style="font-weight: 700;">- {{ CURRENCY_SYMBOL|default:'GH₵' }} 0.00</span>
+          </div>
+
+          <div class="summary-line">
+            <span>Delivery Fee</span>
+            <span id="coDeliveryFee" style="font-weight: 700;">{{ CURRENCY_SYMBOL|default:'GH₵' }} 15.00</span>
+          </div>
+
+          <div class="summary-line total">
+            <span>Total to Pay</span>
+            <span class="amount" id="coTotal">{{ CURRENCY_SYMBOL|default:'GH₵' }} 0.00</span>
+          </div>
+        </div>
+
+        <button type="button" id="btnPlaceOrder" class="btn btn-primary btn-lg btn-block" style="margin-top: 1.5rem;" onclick="window.handleCheckoutSubmit();">
+          <span id="placeOrderText">Place Order</span>
+          <span id="placeOrderSpinner" style="display: none;">Processing...</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% block extra_js %}
+<script>
+  function selectAddressCard(cardEl, addressId, addressText) {
+    document.querySelectorAll('.address-choice-card').forEach(c => c.classList.remove('selected'));
+    cardEl.classList.add('selected');
+    const radio = cardEl.querySelector('input[type="radio"]');
+    if (radio) radio.checked = true;
+    document.getElementById('selectedAddressText').value = addressText;
+  }
+
+  function selectPaymentChoice(cardEl, method) {
+    document.querySelectorAll('.payment-choice-card').forEach(c => c.classList.remove('selected'));
+    cardEl.classList.add('selected');
+    const radio = cardEl.querySelector('input[type="radio"]');
+    if (radio) radio.checked = true;
+  }
+
+  document.getElementById('btnToggleNewAddress')?.addEventListener('click', function() {
+    const form = document.getElementById('newAddressForm');
+    if (form) {
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+      this.textContent = form.style.display === 'block' ? 'Cancel New Address' : '+ Deliver to a Different Address';
+    }
+  });
+
+  function renderCheckoutSummary() {
+    if (!window.ChoCart) return;
+    const items = window.ChoCart.getItems();
+    const listEl = document.getElementById('checkoutItemsList');
+    if (!listEl) return;
+
+    if (items.length === 0) {
+      listEl.innerHTML = '<p style="color: var(--color-text-muted); font-size: 0.9rem;">Your cart is empty. <a href="/menu/">Browse menu</a></p>';
+      document.getElementById('btnPlaceOrder').disabled = true;
+      return;
+    }
+
+    let html = '';
+    items.forEach(function(item) {
+      const lineTotal = (parseFloat(item.price) || 0) * (parseInt(item.quantity, 10) || 1);
+      html += `
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem;">
+          <div>
+            <div style="font-weight: 700; color: var(--color-text-main);">${item.name}</div>
+            <div style="font-size: 0.75rem; color: var(--color-text-muted);">${item.quantity}x &bull; ${window.ChoCart.formatMoney(item.price)}</div>
+          </div>
+          <div style="font-weight: 700; color: var(--color-text-main);">
+            ${window.ChoCart.formatMoney(lineTotal)}
+          </div>
+        </div>
+      `;
+    });
+    listEl.innerHTML = html;
+
+    const subtotal = window.ChoCart.getSubtotal();
+    const discount = window.ChoCart.getDiscountAmount();
+    const deliveryFee = window.ChoCart.getDeliveryFee();
+    const total = window.ChoCart.getGrandTotal();
+
+    document.getElementById('coSubtotal').textContent = window.ChoCart.formatMoney(subtotal);
+    if (discount > 0) {
+      document.getElementById('coDiscountLine').style.display = 'flex';
+      document.getElementById('coDiscount').textContent = `- ${window.ChoCart.formatMoney(discount)}`;
+    }
+    document.getElementById('coDeliveryFee').textContent = deliveryFee === 0 ? 'FREE' : window.ChoCart.formatMoney(deliveryFee);
+    document.getElementById('coTotal').textContent = window.ChoCart.formatMoney(total);
+  }
+
+  window.handleCheckoutSubmit = function() {
+    if (!window.ChoCart || window.ChoCart.getItems().length === 0) {
+      window.showToast('Your cart is empty!', 'warning');
+      return;
+    }
+
+    const name = document.getElementById('custName')?.value || 'Valued Customer';
+    const email = document.getElementById('custEmail')?.value || 'customer@chorestaurant.com';
+    const phone = document.getElementById('custPhone')?.value || '+233 24 000 0004';
+    const notes = document.getElementById('deliveryNotes')?.value || '';
+    const paymentMethod = document.querySelector('input[name="payment_method"]:checked')?.value || 'PAYSTACK';
+    
+    let address = document.getElementById('selectedAddressText')?.value || '14 Independence Avenue, Ridge, Accra';
+    const newAddrLine1 = document.getElementById('newAddrLine1')?.value;
+    if (newAddrLine1 && newAddrLine1.trim()) {
+      address = `${newAddrLine1}, ${document.getElementById('newAddrCity')?.value || 'Accra'}, Ghana`;
+    }
+
+    const btn = document.getElementById('btnPlaceOrder');
+    const textEl = document.getElementById('placeOrderText');
+    const spinnerEl = document.getElementById('placeOrderSpinner');
+
+    btn.disabled = true;
+    if (textEl) textEl.style.display = 'none';
+    if (spinnerEl) spinnerEl.style.display = 'inline';
+
+    const today = new Date();
+    const dateStr = today.getFullYear().toString() + 
+                    String(today.getMonth() + 1).padStart(2, '0') + 
+                    String(today.getDate()).padStart(2, '0');
+    const randPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const orderRef = `ORD-${dateStr}-${randPart}`;
+
+    const orderPayload = {
+      reference: orderRef,
+      customer_name: name,
+      customer_email: email,
+      customer_phone: phone,
+      delivery_address: address,
+      notes: notes,
+      payment_method: paymentMethod,
+      items: window.ChoCart.getItems(),
+      subtotal: window.ChoCart.getSubtotal(),
+      discount: window.ChoCart.getDiscountAmount(),
+      delivery_fee: window.ChoCart.getDeliveryFee(),
+      total: window.ChoCart.getGrandTotal(),
+      placed_at: new Date().toISOString()
+    };
+
+    localStorage.setItem(`cho_order_${orderRef}`, JSON.stringify(orderPayload));
+    localStorage.setItem('cho_latest_order_ref', orderRef);
+
+    try {
+      const history = JSON.parse(localStorage.getItem('cho_customer_orders_history') || '[]');
+      history.unshift(orderPayload);
+      localStorage.setItem('cho_customer_orders_history', JSON.stringify(history));
+    } catch (e) {
+      console.warn('Could not update history', e);
+    }
+
+    window.ChoCart.clearCart();
+
+    setTimeout(function() {
+      if (paymentMethod === 'PAYSTACK') {
+        window.location.href = `/orders/confirmation/?ref=${orderRef}&payment=success`;
+      } else {
+        window.location.href = `/orders/confirmation/?ref=${orderRef}&payment=cash`;
+      }
+    }, 1100);
+  };
+
+  document.addEventListener('DOMContentLoaded', renderCheckoutSummary);
+</script>
+{% endblock %}
+{% endblock %}

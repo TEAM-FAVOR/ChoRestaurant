@@ -1,0 +1,91 @@
+{% extends 'customer/base.html' %}
+{% load static %}
+
+{% block title %}My Profile — {{ RESTAURANT_NAME|default:'Cho Restaurant' }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2.5rem 1.25rem 4rem; max-width: 800px;">
+
+  <!-- Breadcrumbs -->
+  <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--color-text-muted); margin-bottom: 2rem;">
+    <a href="/">Home</a>
+    <span>/</span>
+    <a href="/dashboard/">Dashboard</a>
+    <span>/</span>
+    <span style="color: var(--color-primary); font-weight: 700;">Customer Profile</span>
+  </div>
+
+  <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: 2.5rem; box-shadow: var(--shadow-sm);">
+    
+    <div style="display: flex; align-items: center; gap: 1.25rem; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--color-border);">
+      <div class="user-avatar-circle" style="margin: 0;">
+        {{ user.first_name|default:user.username|slice:":1"|upper }}
+      </div>
+      <div>
+        <h1 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 0.25rem;">{{ user.get_full_name|default:user.username }}</h1>
+        <p style="color: var(--color-text-muted); font-size: 0.9rem;">
+          {{ user.email }} • <span class="top-pill" style="background: var(--color-primary-light); color: var(--color-primary);">{{ user.get_role_display|default:'Customer' }}</span>
+        </p>
+      </div>
+    </div>
+
+    <form method="post" action="{% url 'accounts:profile' %}">
+      {% csrf_token %}
+
+      <h2 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 1rem;">Personal Details</h2>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label">First Name</label>
+          <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}" />
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label">Last Name</label>
+          <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}" />
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 2rem;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label">Email Address *</label>
+          <input type="email" name="email" class="form-control" value="{{ user.email }}" required />
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label">Phone Number (Ghana)</label>
+          <input type="tel" name="phone" class="form-control" value="{{ user.phone|default:'' }}" placeholder="+233 24 000 0000" />
+        </div>
+      </div>
+
+      <!-- Notification Preferences (PRD §4.9) -->
+      {% if pref_form %}
+        <div style="background: var(--color-surface-dim); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.5rem;">Order Notification Preferences</h3>
+          <p style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 1rem;">Choose how you want to be alerted on order progress and kitchen updates.</p>
+
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+              <input type="checkbox" name="notify_email" {% if pref_form.instance.notify_email %}checked{% endif %} />
+              <span style="font-size: 0.9rem; font-weight: 600;">Receive transactional emails (Order confirmation, Paystack receipts)</span>
+            </label>
+
+            <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+              <input type="checkbox" name="notify_sms" {% if pref_form.instance.notify_sms %}checked{% endif %} />
+              <span style="font-size: 0.9rem; font-weight: 600;">Receive SMS status updates on dispatch rider arrival</span>
+            </label>
+
+            <div style="font-size: 0.8rem; color: var(--color-text-subtle); margin-top: 0.25rem;">
+              ℹ️ In-app live status notifications and real-time tracking are always enabled.
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <button type="submit" class="btn btn-primary btn-lg">Update Profile</button>
+        <a href="{% url 'accounts:addresses' %}" class="btn btn-outline">Manage Saved Addresses &rarr;</a>
+      </div>
+    </form>
+
+  </div>
+
+</div>
+{% endblock %}

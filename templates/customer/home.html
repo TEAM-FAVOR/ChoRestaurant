@@ -1,0 +1,333 @@
+{% extends 'customer/base.html' %}
+{% load static %}
+
+{% block title %}{{ RESTAURANT_NAME|default:'Cho Restaurant' }} — Slow-Cooked Ghanaian Specialties &amp; Delivery{% endblock %}
+
+{% block content %}
+
+<!-- 1. Asymmetric Editorial Hero Section -->
+<section class="editorial-hero">
+  <div class="container">
+    <div class="editorial-hero-grid">
+      <div>
+        <span class="hero-editorial-lead">Authentic Kitchen &bull; Ridge, Accra</span>
+        <h1 class="hero-editorial-headline">
+          Real food, <em>cooked slow</em>. Delivered fresh across Accra.
+        </h1>
+        <p class="hero-editorial-copy">
+          From fragrant smoky party Jollof and charcoal-grilled Volta tilapia to spiced plantain kelewele and chilled hibiscus sobolo—cooked fresh on order with locally grown Ghanaian ingredients.
+        </p>
+        <div class="hero-cta-row">
+          <a href="#menuShelf" class="btn btn-primary btn-lg">
+            <span>Explore Menu &amp; Order</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+          <a href="{% url 'menu:menu-list' %}?featured=true" class="btn btn-outline btn-lg">
+            Today's Special Offers
+          </a>
+        </div>
+      </div>
+
+      <!-- Moody Visual with Overlapping Circular Sticker Stamp -->
+      <div class="hero-editorial-visual">
+        <div class="hero-visual-frame">
+          <img src="{% static 'img/dishes/jollof.svg' %}" alt="Smoky Party Jollof with Grilled Chicken" />
+        </div>
+        <!-- Circular Stamp Sticker Badge for AKWAABA10 -->
+        <div class="circular-promo-stamp" title="Use code AKWAABA10 at checkout">
+          <span class="stamp-label">10% OFF</span>
+          <span class="stamp-code">AKWAABA10</span>
+          <span class="stamp-label">FIRST ORDER</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Immediate Food Menu Shelf (Moved Higher with Sleek Horizontal Filter Pills) -->
+<section class="menu-shelf-section" id="menuShelf">
+  <div class="container">
+    <div class="shelf-header reveal-on-scroll">
+      <h2 class="shelf-title">Our Kitchen Menu</h2>
+      <p class="shelf-subtitle">Freshly prepared portions. Select a category below to filter dishes.</p>
+    </div>
+
+    <!-- Sleek Horizontal Category Filter Pills (No dated icons) -->
+    <div class="sleek-filter-bar">
+      <button type="button" class="filter-pill active" data-category="all" onclick="filterShelfCategory('all', this)">
+        All Dishes
+      </button>
+      <button type="button" class="filter-pill" data-category="featured" onclick="filterShelfCategory('featured', this)">
+        Daily Specials
+      </button>
+      {% for category in categories %}
+        <button type="button" class="filter-pill" data-category="{{ category.slug }}" onclick="filterShelfCategory('{{ category.slug }}', this)">
+          {{ category.name }}
+        </button>
+      {% empty %}
+        <button type="button" class="filter-pill" data-category="local-dishes" onclick="filterShelfCategory('local-dishes', this)">
+          Local Ghanaian Dishes
+        </button>
+        <button type="button" class="filter-pill" data-category="grills-starters" onclick="filterShelfCategory('grills-starters', this)">
+          Grills &amp; Starters
+        </button>
+        <button type="button" class="filter-pill" data-category="drinks" onclick="filterShelfCategory('drinks', this)">
+          Chilled Refreshments
+        </button>
+      {% endfor %}
+    </div>
+
+    <!-- Decluttered High-Contrast Dish Grid -->
+    <div class="editorial-food-grid" id="homeFoodGrid">
+      {% for item in food_items %}
+        <div class="editorial-dish-card" data-category-slug="{{ item.category.slug }}" data-featured="{{ item.is_featured|yesno:'true,false' }}">
+          <!-- Edge-to-Edge 4:3 Food Photo -->
+          <div class="dish-card-visual">
+            {% if "jollof" in item.slug %}
+              <img src="{% static 'img/dishes/jollof.svg' %}" alt="{{ item.name }}" />
+            {% elif "tilapia" in item.slug or "banku" in item.slug %}
+              <img src="{% static 'img/dishes/tilapia.svg' %}" alt="{{ item.name }}" />
+            {% elif "waakye" in item.slug %}
+              <img src="{% static 'img/dishes/waakye.svg' %}" alt="{{ item.name }}" />
+            {% elif "kelewele" in item.slug %}
+              <img src="{% static 'img/dishes/kelewele.svg' %}" alt="{{ item.name }}" />
+            {% elif "sobolo" in item.slug or "juice" in item.slug %}
+              <img src="{% static 'img/dishes/sobolo.svg' %}" alt="{{ item.name }}" />
+            {% elif item.image %}
+              <img src="{{ item.image.url }}" alt="{{ item.name }}" onerror="this.src='{% static 'img/dishes/default-dish.svg' %}'" />
+            {% else %}
+              <img src="{% static 'img/dishes/default-dish.svg' %}" alt="{{ item.name }}" />
+            {% endif %}
+          </div>
+
+          <!-- Card Body: Clean Hierarchy (Title + Bold Price on Same Line) -->
+          <div class="dish-card-body">
+            <div class="dish-header-row">
+              <h3 class="dish-title">
+                <a href="{% url 'menu:food-detail' item.slug %}">{{ item.name }}</a>
+              </h3>
+              <div class="dish-price-bold">
+                {{ CURRENCY_SYMBOL|default:'GH₵' }} {{ item.price }}
+              </div>
+            </div>
+
+            <!-- One-Line Sensory Description -->
+            <p class="dish-sensory-desc">
+              {{ item.description|default:"Slow-cooked with authentic Ghanaian seasonings and served piping hot." }}
+            </p>
+
+            <!-- Bottom Action Row: Availability + Clean + Add Button -->
+            <div class="dish-card-action-row">
+              {% if item.is_available %}
+                <span class="dish-availability-tag avail">Available &bull; {{ item.prep_time_minutes }}m prep</span>
+                <button type="button" class="btn-add-minimal btn-add-to-cart"
+                  data-id="{{ item.id }}"
+                  data-name="{{ item.name }}"
+                  data-price="{{ item.price }}"
+                  data-category="{{ item.category.name }}"
+                  data-prep="{{ item.prep_time_minutes }} mins"
+                  {% if "jollof" in item.slug %}data-image="{% static 'img/dishes/jollof.svg' %}"
+                  {% elif "tilapia" in item.slug %}data-image="{% static 'img/dishes/tilapia.svg' %}"
+                  {% elif "waakye" in item.slug %}data-image="{% static 'img/dishes/waakye.svg' %}"
+                  {% elif "kelewele" in item.slug %}data-image="{% static 'img/dishes/kelewele.svg' %}"
+                  {% elif "sobolo" in item.slug %}data-image="{% static 'img/dishes/sobolo.svg' %}"
+                  {% elif item.image %}data-image="{{ item.image.url }}"
+                  {% else %}data-image="{% static 'img/dishes/default-dish.svg' %}"
+                  {% endif %}>
+                  + Add
+                </button>
+              {% else %}
+                <span class="dish-availability-tag sold-out">Sold Out</span>
+                <button type="button" class="btn-add-minimal" disabled style="opacity: 0.5;">
+                  Unavailable
+                </button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- 3. Editorial Numbered Delivery Timeline (The Kitchen Journey) -->
+<section class="editorial-how-it-works">
+  <div class="container">
+    <div class="shelf-header reveal-on-scroll">
+      <h2 class="shelf-title">The Kitchen Journey</h2>
+      <p class="shelf-subtitle">Transparent ordering from cooking station to your table.</p>
+    </div>
+
+    <div class="numbered-steps-grid">
+      <!-- 01 Choose & Customise -->
+      <div class="numbered-step-item reveal-stagger-child">
+        <div class="step-motion-wrapper">
+          <div class="step-motion-graphic">
+            <svg viewBox="0 0 72 72" fill="none" class="journey-svg" aria-label="Earthenware cooking pot with rising steam and spices">
+              <!-- Stew pot base and handles -->
+              <path d="M12 43 C7 43 6 48 11 50" stroke="#1E1916" stroke-width="2.2" stroke-linecap="round"/>
+              <path d="M60 43 C65 43 66 48 61 50" stroke="#1E1916" stroke-width="2.2" stroke-linecap="round"/>
+              <path d="M12 42 C12 57 22 63 36 63 C50 63 60 57 60 42 Z" fill="#C84B31"/>
+              <ellipse cx="36" cy="42" rx="24" ry="5.5" fill="#FAF6F0" stroke="#1E1916" stroke-width="2.2"/>
+              <ellipse cx="36" cy="42" rx="19" ry="3.5" fill="#C84B31"/>
+              <!-- Animated rising steam curls -->
+              <path class="steam-curl steam-1" d="M29 36 C27 30 32 25 29 19 C27 14 31 9 29 5" stroke="#D99B26" stroke-width="2.2" stroke-linecap="round"/>
+              <path class="steam-curl steam-2" d="M36 34 C38 28 34 23 37 17 C39 12 36 7 38 3" stroke="#C84B31" stroke-width="2.2" stroke-linecap="round"/>
+              <path class="steam-curl steam-3" d="M43 36 C45 30 40 25 43 19 C46 14 42 9 44 5" stroke="#2D4A3E" stroke-width="2.2" stroke-linecap="round"/>
+              <!-- Spiced herb leaf sway -->
+              <path class="herb-leaf" d="M47 38 C51 34 54 36 52 40 C49 42 46 40 47 38 Z" fill="#2D4A3E"/>
+            </svg>
+          </div>
+          <div class="step-number-editorial">01</div>
+        </div>
+        <h3 class="step-title-editorial">Choose &amp; Customise</h3>
+        <p class="step-desc-editorial">
+          Select your favorite dishes and specify spice levels or kitchen instructions (extra shito, kelewele, or pepper sauce).
+        </p>
+      </div>
+
+      <!-- 02 Seamless Checkout -->
+      <!-- 02 Seamless Checkout -->
+      <div class="numbered-step-item reveal-stagger-child">
+        <div class="step-motion-wrapper">
+          <div class="step-motion-graphic">
+            <svg viewBox="0 0 72 72" fill="none" class="journey-svg" aria-label="Seamless checkout with payment pulse and checkmark">
+              <!-- Smartphone device outline -->
+              <rect x="20" y="14" width="32" height="49" rx="6" fill="#F5EFE6" stroke="#1E1916" stroke-width="2.2"/>
+              <line x1="31" y1="19" x2="41" y2="19" stroke="#1E1916" stroke-width="2" stroke-linecap="round"/>
+              <rect x="25" y="24" width="22" height="15" rx="3" fill="#FAF6F0" stroke="#E2D9CE" stroke-width="1.2"/>
+              <!-- MoMo / Contactless payment pulse waves -->
+              <circle class="pay-pulse-ring ring-1" cx="36" cy="31" r="13" stroke="#D99B26" stroke-width="1.8"/>
+              <circle class="pay-pulse-ring ring-2" cx="36" cy="31" r="19" stroke="#C84B31" stroke-width="1.6"/>
+              <!-- Verified payment badge and drawing checkmark -->
+              <circle cx="36" cy="47" r="10.5" fill="#2D4A3E" stroke="#1E1916" stroke-width="1.6"/>
+              <path class="draw-check" d="M31 47 L34.5 50.5 L41.5 43.5" stroke="#FAF6F0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="step-number-editorial">02</div>
+        </div>
+        <h3 class="step-title-editorial">Seamless Checkout</h3>
+        <p class="step-desc-editorial">
+          Confirm your Accra delivery address and pay securely via Mobile Money, Visa/Mastercard with Paystack, or choose Cash on Delivery.
+        </p>
+      </div>
+
+      <!-- 03 Dispatched Warm -->
+      <!-- 02 Seamless Checkout -->
+      <div class="numbered-step-item reveal-stagger-child">
+        <div class="step-motion-wrapper">
+          <div class="step-motion-graphic">
+            <svg viewBox="0 0 72 72" fill="none" class="journey-svg" aria-label="Dispatch rider gliding along route with warmth ripples">
+              <!-- Ground route hairline track -->
+              <line x1="8" y1="58" x2="64" y2="58" stroke="#E2D9CE" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 3"/>
+              <!-- Gliding scooter and rider group -->
+              <g class="gliding-rider">
+                <!-- Wheels -->
+                <circle cx="21" cy="53" r="6" stroke="#1E1916" stroke-width="2.2" fill="#FAF6F0"/>
+                <circle cx="51" cy="53" r="6" stroke="#1E1916" stroke-width="2.2" fill="#FAF6F0"/>
+                <!-- Chassis -->
+                <path d="M21 53 L29 45 L43 45 L51 53" stroke="#1E1916" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M43 45 L47 34 L44 32" stroke="#1E1916" stroke-width="2.2" stroke-linecap="round"/>
+                <!-- Thermal meal carrier box -->
+                <rect x="15" y="32" width="16" height="15" rx="3" fill="#C84B31" stroke="#1E1916" stroke-width="2"/>
+                <path d="M23 37 C21.5 39 22 41.5 23 42.5 C24 41.5 24.5 39 23 37 Z" fill="#D99B26"/>
+                <!-- Rider silhouette -->
+                <circle cx="36" cy="27" r="4.5" fill="#2D4A3E" stroke="#1E1916" stroke-width="1.8"/>
+                <path d="M34 31.5 L39 42" stroke="#1E1916" stroke-width="2.4" stroke-linecap="round"/>
+                <!-- Warmth indicators -->
+                <path class="heat-wave heat-1" d="M18 28 C17 25 20 23 19 20" stroke="#D99B26" stroke-width="1.8" stroke-linecap="round"/>
+                <path class="heat-wave heat-2" d="M23 29 C22 26 25 24 24 21" stroke="#C84B31" stroke-width="1.8" stroke-linecap="round"/>
+                <path class="heat-wave heat-3" d="M28 28 C27 25 30 23 29 20" stroke="#D99B26" stroke-width="1.8" stroke-linecap="round"/>
+              </g>
+            </svg>
+          </div>
+          <div class="step-number-editorial">03</div>
+        </div>
+        <h3 class="step-title-editorial">Dispatched Warm</h3>
+        <p class="step-desc-editorial">
+          Packed in heat-sealed containers and carried by our dedicated dispatch riders with live tracking to your doorstep.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Realistic, Punchy Social Proof -->
+<section class="editorial-reviews-section">
+  <div class="container">
+    <div class="shelf-header reveal-on-scroll">
+      <h2 class="shelf-title">From Our Diners</h2>
+      <p class="shelf-subtitle">Authentic reviews from regular customers across Accra.</p>
+    </div>
+
+    <div class="reviews-quote-grid">
+      <div class="quote-card reveal-stagger-child">
+        <p class="quote-text">
+          &ldquo;The smoky flavor on the party Jollof is proper. Kelewele was soft and spicy. Delivered warm to Ridge in 28 minutes.&rdquo;
+        </p>
+        <div class="quote-author-line">Akua Asante &bull; Ridge, Accra</div>
+      </div>
+
+      <div class="quote-card reveal-stagger-child">
+        <p class="quote-text">
+          &ldquo;Massive grilled tilapia with raw pepper sauce and fresh banku. One of the very few online kitchens that gets the ginger marinade right.&rdquo;
+        </p>
+        <div class="quote-author-line">Kwame Mensah &bull; East Legon</div>
+      </div>
+
+      <div class="quote-card reveal-stagger-child">
+        <p class="quote-text">
+          &ldquo;Cold-pressed Sobolo with the right ginger kick. We order lunch for the whole office every Friday.&rdquo;
+        </p>
+        <div class="quote-author-line">Esi Boateng &bull; Osu</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% block extra_js %}
+<script>
+  function filterShelfCategory(slug, btn) {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+
+    const grid = document.getElementById('homeFoodGrid');
+    if (!grid) return;
+
+    // Smooth quick opacity transition
+    grid.style.opacity = '0.35';
+    grid.style.transform = 'translateY(4px)';
+    grid.style.transition = 'opacity 140ms ease, transform 140ms ease';
+
+    setTimeout(() => {
+      const cards = grid.querySelectorAll('.editorial-dish-card');
+      let visibleIdx = 0;
+      cards.forEach(card => {
+        const cat = card.getAttribute('data-category-slug');
+        const isFeat = card.getAttribute('data-featured') === 'true';
+        let show = false;
+
+        if (slug === 'all') {
+          show = true;
+        } else if (slug === 'featured') {
+          show = isFeat;
+        } else {
+          show = (cat === slug);
+        }
+
+        if (show) {
+          card.style.display = 'flex';
+          card.style.animation = `cardFadeIn 280ms cubic-bezier(0.22, 1, 0.36, 1) ${Math.min(visibleIdx * 25, 150)}ms both`;
+          visibleIdx++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      grid.style.opacity = '1';
+      grid.style.transform = 'translateY(0)';
+    }, 120);
+  }
+</script>
+{% endblock %}
+{% endblock %}
