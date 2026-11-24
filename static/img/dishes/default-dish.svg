@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" fill="none">
+  <!-- General Fallback Gourmet Dish Plate Visual -->
+  <defs>
+    <radialGradient id="plateBase" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="85%" stop-color="#F8FAFC" />
+      <stop offset="100%" stop-color="#E2E8F0" />
+    </radialGradient>
+    <linearGradient id="mealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EA580C" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="#FFF7ED" />
+  <circle cx="300" cy="200" r="160" fill="#E2E8F0" />
+  <circle cx="300" cy="200" r="150" fill="url(#plateBase)" stroke="#CBD5E1" stroke-width="2" />
+  <circle cx="300" cy="200" r="120" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" />
+  
+  <!-- Cloche / Chef Dish Icon Motif -->
+  <circle cx="300" cy="200" r="85" fill="#FFEDD5" />
+  <path d="M235 220 C235 160 365 160 365 220 Z" fill="url(#mealGrad)" />
+  <rect x="225" y="222" width="150" height="8" rx="4" fill="#9A3412" />
+  <circle cx="300" cy="155" r="12" fill="#9A3412" />
+  <!-- Steam lines -->
+  <path d="M275 135 Q265 115 275 95" stroke="#FB923C" stroke-width="3" stroke-linecap="round" fill="none" />
+  <path d="M300 130 Q310 110 300 90" stroke="#FB923C" stroke-width="3.5" stroke-linecap="round" fill="none" />
+  <path d="M325 135 Q335 115 325 95" stroke="#FB923C" stroke-width="3" stroke-linecap="round" fill="none" />
+</svg>

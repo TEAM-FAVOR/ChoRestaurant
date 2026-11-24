@@ -25,6 +25,8 @@ urlpatterns = [
     # Developer 1: Menu & Categories (web admin/catalog + API)
     path("menu/", include("apps.menu.urls", namespace="menu")),
     path("api/menu/", include("apps.menu.api_urls", namespace="menu-api")),
+    # Developer 2: Customer Website, Menu Interface & Shopping Experience
+    path("", include("apps.core.customer_urls", namespace="customer")),
 ]
 
 if settings.DEBUG:

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" fill="none">
+  <!-- Chilled Sobolo & Fresh Juice Visual -->
+  <defs>
+    <linearGradient id="soboloGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#881337" />
+      <stop offset="60%" stop-color="#4C0519" />
+      <stop offset="100%" stop-color="#26020B" />
+    </linearGradient>
+    <linearGradient id="juiceGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047" />
+      <stop offset="70%" stop-color="#EAB308" />
+      <stop offset="100%" stop-color="#CA8A04" />
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="#FDF2F8" />
+  
+  <!-- Sobolo Glass (Left) -->
+  <g transform="translate(180, 80)">
+    <!-- Glass body -->
+    <path d="M20 30 L35 210 Q40 230 75 230 Q110 230 115 210 L130 30 Z" fill="url(#soboloGrad)" />
+    <!-- Glass Rim -->
+    <ellipse cx="75" cy="30" rx="55" ry="12" fill="#E2E8F0" opacity="0.5" stroke="#FFFFFF" stroke-width="2" />
+    <!-- Ice cubes in Sobolo -->
+    <rect x="45" y="70" width="28" height="24" rx="4" fill="#FFFFFF" opacity="0.3" transform="rotate(15 45 70)" />
+    <rect x="75" y="90" width="26" height="26" rx="4" fill="#FFFFFF" opacity="0.35" transform="rotate(-20 75 90)" />
+    <!-- Mint sprig garnish -->
+    <path d="M75 25 C65 5 80 -10 95 0 C95 15 85 25 75 25 Z" fill="#22C55E" />
+    <path d="M75 25 C85 10 105 10 105 25 Z" fill="#16A34A" />
+    <!-- Eco Straw -->
+    <rect x="90" y="-20" width="8" height="210" rx="3" fill="#FB7185" transform="rotate(12 90 -20)" />
+  </g>
+  
+  <!-- Pineapple Juice Glass (Right) -->
+  <g transform="translate(320, 100)">
+    <!-- Glass body -->
+    <path d="M15 25 L30 190 Q35 210 65 210 Q95 210 100 190 L115 25 Z" fill="url(#juiceGrad)" />
+    <ellipse cx="65" cy="25" rx="50" ry="10" fill="#FEF08A" opacity="0.5" stroke="#FFFFFF" stroke-width="2" />
+    <!-- Pineapple wedge garnish -->
+    <path d="M15 25 L-10 10 L-5 -15 L25 5 Z" fill="#FACC15" stroke="#EAB308" stroke-width="2" />
+    <!-- Eco Straw -->
+    <rect x="75" y="-15" width="7" height="190" rx="3" fill="#4ADE80" transform="rotate(-10 75 -15)" />
+  </g>
+</svg>

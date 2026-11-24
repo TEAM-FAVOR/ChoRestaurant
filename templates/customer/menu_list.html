@@ -1,0 +1,201 @@
+{% extends 'customer/base.html' %}
+{% load static %}
+
+{% block title %}Menu — {{ RESTAURANT_NAME|default:'Cho Restaurant' }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 3rem 1.5rem 5rem;">
+
+  <!-- Breadcrumbs -->
+  <div style="font-size: 0.85rem; color: var(--color-text-subtle); margin-bottom: 1.5rem;">
+    <a href="/" style="color: var(--color-text-muted);">Home</a>
+    <span style="margin: 0 0.4rem;">/</span>
+    <span style="color: var(--color-text-main); font-weight: 600;">Menu Catalog</span>
+    {% if selected_category %}
+      <span style="margin: 0 0.4rem;">/</span>
+      <span style="color: var(--color-primary); font-weight: 700; text-transform: capitalize;">{{ selected_category }}</span>
+    {% endif %}
+  </div>
+
+  <!-- Header -->
+  <div style="margin-bottom: 2rem;">
+    <h1 style="font-family: var(--font-family-display); font-size: clamp(2.2rem, 4vw, 3rem); margin-bottom: 0.5rem;">
+      {% if request.GET.featured %}
+        Special Meals &amp; Daily Offers
+      {% elif selected_category %}
+        Dishes in {{ selected_category|title }}
+      {% else %}
+        Our Kitchen Menu
+      {% endif %}
+    </h1>
+    <p style="font-size: 1.05rem; color: var(--color-text-muted); max-width: 600px;">
+      Slow-cooked Ghanaian specialties, charcoal grills, and cold-pressed drinks.
+    </p>
+  </div>
+
+  <!-- Search & Sleek Filter Row -->
+  <div style="margin-bottom: 2.25rem;">
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+      <div style="flex: 1; min-width: 260px; max-width: 440px;">
+        <input type="text" id="menuSearchInput" class="form-control" placeholder="Search dishes or ingredients..." value="{{ search_query }}" style="border-radius: var(--radius-full); padding: 0.7rem 1.25rem;" />
+      </div>
+    </div>
+
+    <!-- Sleek Horizontal Category Filter Pills -->
+    <div class="sleek-filter-bar" style="margin-bottom: 0;">
+      <a href="{% url 'menu:menu-list' %}" class="filter-pill {% if not selected_category and not request.GET.featured %}active{% endif %}" data-category="all" data-filter-mode="client">
+        All Dishes
+      </a>
+      <a href="{% url 'menu:menu-list' %}?featured=true" class="filter-pill {% if request.GET.featured %}active{% endif %}">
+        Daily Specials
+      </a>
+      {% for cat in categories %}
+        <a href="{% url 'menu:menu-list' %}?category={{ cat.slug }}" class="filter-pill {% if selected_category == cat.slug %}active{% endif %}" data-category="{{ cat.slug }}" data-filter-mode="client">
+          {{ cat.name }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Decluttered Food Grid -->
+  <div class="editorial-food-grid" id="menuFoodGrid">
+    {% for item in food_items %}
+      <div class="editorial-dish-card food-card" data-name="{{ item.name }}" data-desc="{{ item.description }}" data-category-slug="{{ item.category.slug }}">
+        <div class="dish-card-visual">
+          {% if "jollof" in item.slug %}
+            <img src="{% static 'img/dishes/jollof.svg' %}" alt="{{ item.name }}" />
+          {% elif "tilapia" in item.slug or "banku" in item.slug %}
+            <img src="{% static 'img/dishes/tilapia.svg' %}" alt="{{ item.name }}" />
+          {% elif "waakye" in item.slug %}
+            <img src="{% static 'img/dishes/waakye.svg' %}" alt="{{ item.name }}" />
+          {% elif "kelewele" in item.slug %}
+            <img src="{% static 'img/dishes/kelewele.svg' %}" alt="{{ item.name }}" />
+          {% elif "sobolo" in item.slug or "juice" in item.slug %}
+            <img src="{% static 'img/dishes/sobolo.svg' %}" alt="{{ item.name }}" />
+          {% elif item.image %}
+            <img src="{{ item.image.url }}" alt="{{ item.name }}" onerror="this.src='{% static 'img/dishes/default-dish.svg' %}'" />
+          {% else %}
+            <img src="{% static 'img/dishes/default-dish.svg' %}" alt="{{ item.name }}" />
+          {% endif %}
+        </div>
+
+        <div class="dish-card-body">
+          <div class="dish-header-row">
+            <h3 class="dish-title">
+              <a href="{% url 'menu:food-detail' item.slug %}">{{ item.name }}</a>
+            </h3>
+            <div class="dish-price-bold">
+              {{ CURRENCY_SYMBOL|default:'GH₵' }} {{ item.price }}
+            </div>
+          </div>
+
+          <p class="dish-sensory-desc">
+            {{ item.description|default:"Slow-cooked with authentic spices and served piping hot." }}
+          </p>
+
+          <div class="dish-card-action-row">
+            {% if item.is_available %}
+              <span class="dish-availability-tag avail">Available &bull; {{ item.prep_time_minutes }}m</span>
+              <button type="button" class="btn-add-minimal btn-add-to-cart"
+                data-id="{{ item.id }}"
+                data-name="{{ item.name }}"
+                data-price="{{ item.price }}"
+                data-category="{{ item.category.name }}"
+                data-prep="{{ item.prep_time_minutes }} mins"
+                {% if "jollof" in item.slug %}data-image="{% static 'img/dishes/jollof.svg' %}"
+                {% elif "tilapia" in item.slug %}data-image="{% static 'img/dishes/tilapia.svg' %}"
+                {% elif "waakye" in item.slug %}data-image="{% static 'img/dishes/waakye.svg' %}"
+                {% elif "kelewele" in item.slug %}data-image="{% static 'img/dishes/kelewele.svg' %}"
+                {% elif "sobolo" in item.slug %}data-image="{% static 'img/dishes/sobolo.svg' %}"
+                {% elif item.image %}data-image="{{ item.image.url }}"
+                {% else %}data-image="{% static 'img/dishes/default-dish.svg' %}"
+                {% endif %}>
+                + Add
+              </button>
+            {% else %}
+              <span class="dish-availability-tag sold-out">Sold Out</span>
+              <button type="button" class="btn-add-minimal" disabled style="opacity: 0.5;">
+                Unavailable
+              </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem;">
+        <h3 style="font-family: var(--font-family-display); font-size: 1.4rem; margin-bottom: 0.5rem;">No dishes found</h3>
+        <p style="color: var(--color-text-muted); margin-bottom: 1.5rem;">Try another search or view all dishes.</p>
+        <a href="{% url 'menu:menu-list' %}" class="btn btn-primary btn-sm">Clear Filter</a>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div id="noMenuResults" style="display: none; text-align: center; padding: 4rem 1rem;">
+    <h3 style="font-family: var(--font-family-display); font-size: 1.3rem; margin-bottom: 0.5rem;">No matching dishes</h3>
+    <p style="color: var(--color-text-muted);">Try a different keyword like "Jollof", "Banku", "Kelewele", or "Sobolo".</p>
+  </div>
+
+</div>
+
+{% block extra_js %}
+<script>
+  /* ── Menu List: smooth client-side filter with staggered card entrance ── */
+  (function () {
+    const searchInput  = document.getElementById('menuSearchInput');
+    const grid         = document.getElementById('menuFoodGrid');
+    const noResults    = document.getElementById('noMenuResults');
+    const pills        = document.querySelectorAll('.filter-pill[data-filter-mode="client"]');
+
+    function runFilter() {
+      const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+      const activePill = document.querySelector('.filter-pill.active');
+      const selectedCat = activePill ? (activePill.getAttribute('data-category') || 'all') : 'all';
+
+      if (grid) {
+        grid.style.opacity = '0.35';
+        grid.style.transform = 'translateY(5px)';
+      }
+
+      setTimeout(() => {
+        const cards = document.querySelectorAll('#menuFoodGrid .editorial-dish-card, #menuFoodGrid .food-card');
+        let visibleIdx = 0;
+        cards.forEach(card => {
+          const name = (card.getAttribute('data-name') || '').toLowerCase();
+          const desc = (card.getAttribute('data-desc') || '').toLowerCase();
+          const cat  = (card.getAttribute('data-category-slug') || '').toLowerCase();
+
+          const matchQ = !query || name.includes(query) || desc.includes(query);
+          const matchC = selectedCat === 'all' || cat === selectedCat;
+
+          if (matchQ && matchC) {
+            card.style.display = 'flex';
+            card.style.animation = `cardFadeIn 280ms cubic-bezier(0.22,1,0.36,1) ${Math.min(visibleIdx * 30, 180)}ms both`;
+            visibleIdx++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        if (noResults) noResults.style.display = visibleIdx === 0 ? 'block' : 'none';
+
+        if (grid) {
+          grid.style.opacity = '1';
+          grid.style.transform = 'translateY(0)';
+        }
+      }, 110);
+    }
+
+    if (searchInput) searchInput.addEventListener('input', runFilter);
+
+    pills.forEach(pill => {
+      pill.addEventListener('click', e => {
+        e.preventDefault();
+        pills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        runFilter();
+      });
+    });
+  })();
+</script>
+{% endblock extra_js %}
+{% endblock content %}

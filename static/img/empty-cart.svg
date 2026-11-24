@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <!-- Empty Shopping Cart Illustration -->
+  <defs>
+    <linearGradient id="cartBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF8E1" />
+      <stop offset="100%" stop-color="#FFE0B2" />
+    </linearGradient>
+  </defs>
+  <circle cx="200" cy="150" r="110" fill="url(#cartBg)" opacity="0.6"/>
+  <circle cx="200" cy="150" r="85" fill="#FFFFFF"/>
+  
+  <!-- Empty Basket / Plate with Floating Food steam bubbles -->
+  <g transform="translate(145, 95)">
+    <!-- Cart Wireframe -->
+    <path d="M15 15 L28 15 L45 65 L90 65 L102 30 L35 30" stroke="#CBD5E1" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="48" cy="80" r="8" fill="#CBD5E1"/>
+    <circle cx="85" cy="80" r="8" fill="#CBD5E1"/>
+    <!-- Floating sad plate / empty cloche -->
+    <path d="M45 48 C45 38 75 38 75 48 Z" fill="#F1F5F9"/>
+    <line x1="40" y1="50" x2="80" y2="50" stroke="#CBD5E1" stroke-width="2"/>
+    <circle cx="60" cy="36" r="3" fill="#CBD5E1"/>
+  </g>
+  <text x="200" y="235" text-anchor="middle" font-family="'Inter', sans-serif" font-weight="700" font-size="17" fill="#475569">
+    Your cart is hungry!
+  </text>
+  <text x="200" y="258" text-anchor="middle" font-family="'Inter', sans-serif" font-weight="400" font-size="13" fill="#94A3B8">
+    Browse our delicious Ghanaian dishes and add your favorites.
+  </text>
+</svg>

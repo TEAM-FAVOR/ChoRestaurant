@@ -1,0 +1,252 @@
+{% extends 'customer/base.html' %}
+{% load static %}
+
+{% block title %}Shopping Cart — {{ RESTAURANT_NAME|default:'Cho Restaurant' }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 3rem 1.5rem 5rem;">
+
+  <!-- Breadcrumbs -->
+  <div style="font-size: 0.85rem; color: var(--color-text-subtle); margin-bottom: 2rem;">
+    <a href="/" style="color: var(--color-text-muted);">Home</a>
+    <span style="margin: 0 0.4rem;">/</span>
+    <a href="{% url 'menu:menu-list' %}" style="color: var(--color-text-muted);">Menu</a>
+    <span style="margin: 0 0.4rem;">/</span>
+    <span style="color: var(--color-text-main); font-weight: 600;">Your Cart</span>
+  </div>
+
+  <h1 style="font-family: var(--font-family-display); font-size: clamp(2.2rem, 3.8vw, 2.8rem); margin-bottom: 2rem;">
+    Shopping Cart <span id="cartHeaderCount" style="font-family: var(--font-family-body); font-size: 1.15rem; font-weight: 500; color: var(--color-text-muted);">(0 items)</span>
+  </h1>
+
+  <!-- Cart Page Grid -->
+  <div class="cart-page-grid" id="cartContentGrid">
+    
+    <!-- Left Column: Items Table & Promo Code Box -->
+    <div>
+      <div class="cart-table-card">
+        <table class="cart-table">
+          <thead>
+            <tr>
+              <th style="width: 45%;">Dish</th>
+              <th style="width: 18%;">Price</th>
+              <th style="width: 20%;">Quantity</th>
+              <th style="width: 17%; text-align: right;">Total</th>
+            </tr>
+          </thead>
+          <tbody id="cartTableBody">
+            <!-- Rendered dynamically by ChoCart.subscribe -->
+          </tbody>
+        </table>
+
+        <!-- Cart Action Bar -->
+        <div style="padding: 1.25rem 1.5rem; background: var(--color-surface-warm); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <a href="{% url 'menu:menu-list' %}" class="btn btn-outline btn-sm">
+            &larr; Add More Dishes
+          </a>
+          <button type="button" class="btn btn-outline btn-sm" style="color: var(--color-danger); border-color: var(--color-border-dark);" onclick="if(confirm('Clear all items from your cart?')){window.ChoCart.clearCart();}">
+            Clear Cart
+          </button>
+        </div>
+      </div>
+
+      <!-- Promo Code Card -->
+      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; margin-top: 1.5rem;">
+        <h4 style="font-family: var(--font-family-display); font-size: 1.15rem; margin-bottom: 0.35rem;">
+          Promotional Code
+        </h4>
+        <p style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 1rem;">
+          Use <strong>AKWAABA10</strong> for 10% off or <strong>FREEDEL</strong> for free delivery.
+        </p>
+
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="text" id="promoCodeInput" class="form-control" placeholder="Enter coupon code..." style="text-transform: uppercase;" />
+          <button type="button" id="btnApplyPromo" class="btn btn-primary btn-sm">Apply</button>
+        </div>
+
+        <div id="promoFeedback" style="margin-top: 0.75rem; font-size: 0.85rem;"></div>
+      </div>
+    </div>
+
+    <!-- Right Column: Sticky Order Summary Box -->
+    <div>
+      <div class="order-summary-card">
+        <h3 class="order-summary-title">Order Summary</h3>
+
+        <!-- Free Delivery Progress Tracker -->
+        <div id="freeDeliveryProgress" style="margin-bottom: 1.25rem; padding: 0.85rem 1rem; background: var(--color-surface-warm); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.825rem; color: var(--color-secondary); font-weight: 600;">
+          Add more for Free Delivery!
+        </div>
+
+        <div class="summary-line">
+          <span>Items Subtotal</span>
+          <span id="summarySubtotal" style="font-weight: 700; color: var(--color-text-main);">{{ CURRENCY_SYMBOL|default:'GH₵' }} 0.00</span>
+        </div>
+
+        <div class="summary-line" id="discountLine" style="display: none; color: var(--color-primary);">
+          <span>Promo Discount</span>
+          <span id="summaryDiscount" style="font-weight: 700;">- {{ CURRENCY_SYMBOL|default:'GH₵' }} 0.00</span>
+        </div>
+
+        <div class="summary-line">
+          <span>Delivery Fee (Accra)</span>
+          <span id="summaryDeliveryFee" style="font-weight: 700; color: var(--color-text-main);">{{ CURRENCY_SYMBOL|default:'GH₵' }} 15.00</span>
+        </div>
+
+        <div class="summary-line total">
+          <span>Total Payable</span>
+          <span class="amount" id="summaryTotal">{{ CURRENCY_SYMBOL|default:'GH₵' }} 0.00</span>
+        </div>
+
+        <div style="margin-top: 1.5rem;">
+          <a href="/checkout/" id="btnProceedCheckout" class="btn btn-primary btn-lg btn-block">
+            <span>Proceed to Checkout</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+        </div>
+
+        <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--color-border); font-size: 0.8rem; color: var(--color-text-muted); display: flex; flex-direction: column; gap: 0.4rem;">
+          <div>🔒 Secured checkout with Paystack (MoMo &amp; Cards)</div>
+          <div>🍲 Prepared fresh &bull; 30–45 min delivery across Accra</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Empty Cart State -->
+  <div id="cartEmptyState" style="display: none; text-align: center; padding: 5rem 1rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); max-width: 580px; margin: 0 auto;">
+    <img src="{% static 'img/empty-cart.svg' %}" alt="Empty Cart" style="width: 160px; margin: 0 auto 1.5rem;" />
+    <h2 style="font-family: var(--font-family-display); font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem;">Your Cart is Empty</h2>
+    <p style="color: var(--color-text-muted); font-size: 1rem; margin-bottom: 2rem;">
+      Choose from our rich menu of slow-cooked Ghanaian specialties.
+    </p>
+    <a href="{% url 'menu:menu-list' %}" class="btn btn-primary btn-lg">
+      Browse Food Menu
+    </a>
+  </div>
+
+</div>
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    function renderCartPage(cart) {
+      const items = cart.getItems();
+      const count = cart.getItemCount();
+      const countEl = document.getElementById('cartHeaderCount');
+      const gridEl = document.getElementById('cartContentGrid');
+      const emptyEl = document.getElementById('cartEmptyState');
+      const tbody = document.getElementById('cartTableBody');
+
+      if (countEl) countEl.textContent = `(${count} item${count === 1 ? '' : 's'})`;
+
+      if (items.length === 0) {
+        if (gridEl) gridEl.style.display = 'none';
+        if (emptyEl) emptyEl.style.display = 'block';
+        return;
+      }
+
+      if (gridEl) gridEl.style.display = 'grid';
+      if (emptyEl) emptyEl.style.display = 'none';
+
+      let html = '';
+      items.forEach(function(item) {
+        const lineTotal = (parseFloat(item.price) || 0) * (parseInt(item.quantity, 10) || 1);
+        html += `
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 1rem;">
+                <img src="${item.image}" alt="${item.name}" style="width: 60px; height: 60px; border-radius: var(--radius-sm); object-fit: cover;" onerror="this.src='/static/img/dishes/default-dish.svg'" />
+                <div>
+                  <h4 style="font-family: var(--font-family-display); font-size: 1.05rem; font-weight: 700; margin-bottom: 0.2rem;">${item.name}</h4>
+                  <div style="font-size: 0.8rem; color: var(--color-text-muted);">${item.category || 'Dish'}</div>
+                  ${item.instructions ? `<div style="font-size: 0.75rem; color: var(--color-primary); font-style: italic; margin-top: 2px;">Note: "${item.instructions}"</div>` : ''}
+                </div>
+              </div>
+            </td>
+            <td style="font-weight: 700; color: var(--color-text-main); font-size: 0.95rem;">
+              ${cart.formatMoney(item.price)}
+            </td>
+            <td>
+              <div class="qty-stepper">
+                <button type="button" class="qty-btn" onclick="window.ChoCart.updateQuantity('${item.id}', ${item.quantity - 1})">-</button>
+                <input type="text" class="qty-input" value="${item.quantity}" readonly />
+                <button type="button" class="qty-btn" onclick="window.ChoCart.updateQuantity('${item.id}', ${item.quantity + 1})">+</button>
+              </div>
+            </td>
+            <td style="text-align: right;">
+              <div style="font-weight: 800; font-size: 1.05rem; color: var(--color-text-main); margin-bottom: 0.25rem;">
+                ${cart.formatMoney(lineTotal)}
+              </div>
+              <button type="button" style="background: transparent; border: none; color: var(--color-text-subtle); cursor: pointer; font-size: 0.8rem;" onclick="window.ChoCart.removeItem('${item.id}')">
+                Remove
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+      if (tbody) tbody.innerHTML = html;
+
+      const subtotal = cart.getSubtotal();
+      const discount = cart.getDiscountAmount();
+      const deliveryFee = cart.getDeliveryFee();
+      const total = cart.getGrandTotal();
+
+      const subtotalEl = document.getElementById('summarySubtotal');
+      const discountEl = document.getElementById('summaryDiscount');
+      const discountLine = document.getElementById('discountLine');
+      const deliveryEl = document.getElementById('summaryDeliveryFee');
+      const totalEl = document.getElementById('summaryTotal');
+      const freeDelProgress = document.getElementById('freeDeliveryProgress');
+
+      if (subtotalEl) subtotalEl.textContent = cart.formatMoney(subtotal);
+      if (discount > 0) {
+        if (discountLine) discountLine.style.display = 'flex';
+        if (discountEl) discountEl.textContent = `- ${cart.formatMoney(discount)}`;
+      } else {
+        if (discountLine) discountLine.style.display = 'none';
+      }
+
+      if (deliveryEl) {
+        deliveryEl.textContent = deliveryFee === 0 ? 'FREE' : cart.formatMoney(deliveryFee);
+        if (deliveryFee === 0) deliveryEl.style.color = 'var(--color-secondary)';
+        else deliveryEl.style.color = 'var(--color-text-main)';
+      }
+
+      if (totalEl) totalEl.textContent = cart.formatMoney(total);
+
+      if (freeDelProgress) {
+        const threshold = cart.config.freeDeliveryThreshold;
+        if (subtotal >= threshold || (cart.activePromo && cart.activePromo.freeDelivery)) {
+          freeDelProgress.innerHTML = '🎉 You have unlocked <strong>FREE Delivery</strong>!';
+          freeDelProgress.style.color = 'var(--color-secondary)';
+        } else {
+          const needed = threshold - subtotal;
+          freeDelProgress.innerHTML = `Add <strong>${cart.formatMoney(needed)}</strong> more for <strong>FREE Delivery</strong>!`;
+          freeDelProgress.style.color = 'var(--color-text-muted)';
+        }
+      }
+    }
+
+    if (window.ChoCart) {
+      window.ChoCart.subscribe(renderCartPage);
+    }
+
+    document.getElementById('btnApplyPromo')?.addEventListener('click', function() {
+      const input = document.getElementById('promoCodeInput');
+      const feedback = document.getElementById('promoFeedback');
+      if (!input || !feedback) return;
+
+      const res = window.ChoCart.applyPromoCode(input.value);
+      if (res.success) {
+        feedback.innerHTML = `<span style="color: var(--color-secondary); font-weight: 700;">✓ ${res.message}</span>`;
+        window.showToast(res.message, 'success');
+      } else {
+        feedback.innerHTML = `<span style="color: var(--color-danger); font-weight: 600;">✕ ${res.message}</span>`;
+      }
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}

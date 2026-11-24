@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <!-- Empty Orders History Illustration -->
+  <defs>
+    <linearGradient id="orderBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F1F5F9" />
+      <stop offset="100%" stop-color="#E2E8F0" />
+    </linearGradient>
+  </defs>
+  <circle cx="200" cy="140" r="80" fill="url(#orderBg)"/>
+  <rect x="165" y="100" width="70" height="85" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="3"/>
+  <!-- Receipt Lines -->
+  <line x1="178" y1="118" x2="222" y2="118" stroke="#E2E8F0" stroke-width="4" stroke-linecap="round"/>
+  <line x1="178" y1="132" x2="212" y2="132" stroke="#E2E8F0" stroke-width="3" stroke-linecap="round"/>
+  <line x1="178" y1="144" x2="217" y2="144" stroke="#E2E8F0" stroke-width="3" stroke-linecap="round"/>
+  <line x1="178" y1="162" x2="205" y2="162" stroke="#CBD5E1" stroke-width="4" stroke-linecap="round"/>
+  <!-- Cloche icon badge -->
+  <circle cx="225" cy="175" r="18" fill="#E65100"/>
+  <path d="M217 178 C217 171 233 171 233 178 Z" fill="#FFFFFF"/>
+  <rect x="215" y="179" width="20" height="2" fill="#FFFFFF"/>
+  
+  <text x="200" y="245" text-anchor="middle" font-family="'Inter', sans-serif" font-weight="700" font-size="16" fill="#475569">
+    No orders yet
+  </text>
+  <text x="200" y="268" text-anchor="middle" font-family="'Inter', sans-serif" font-weight="400" font-size="13" fill="#94A3B8">
+    When you place an order, its real-time status and receipt will show here.
+  </text>
+</svg>

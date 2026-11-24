@@ -1,0 +1,130 @@
+{% extends 'customer/base.html' %}
+{% load static %}
+
+{% block title %}Saved Delivery Addresses — {{ RESTAURANT_NAME|default:'Cho Restaurant' }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2.5rem 1.25rem 4rem;">
+
+  <!-- Breadcrumbs -->
+  <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--color-text-muted); margin-bottom: 2rem;">
+    <a href="/">Home</a>
+    <span>/</span>
+    <a href="/dashboard/">Dashboard</a>
+    <span>/</span>
+    <span style="color: var(--color-primary); font-weight: 700;">Delivery Addresses</span>
+  </div>
+
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: clamp(1.8rem, 3vw, 2.4rem); margin-bottom: 0.25rem;">Saved Delivery Addresses</h1>
+      <p style="font-size: 1rem; color: var(--color-text-muted);">Manage your delivery locations in Accra for rapid food dispatch.</p>
+    </div>
+    <a href="#newAddressSection" class="btn btn-primary btn-sm">+ Add New Address</a>
+  </div>
+
+  <!-- Saved Addresses Grid -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 3.5rem;">
+    {% for addr in addresses %}
+      <div style="background: var(--color-surface); border: 1.5px solid {% if addr.is_default %}var(--color-primary){% else %}var(--color-border){% endif %}; border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; position: relative;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--color-primary); display: flex; align-items: center; gap: 0.4rem;">
+            <span>📍</span> {{ addr.label }}
+          </h3>
+          {% if addr.is_default %}
+            <span class="top-pill" style="background: var(--color-primary-light); color: var(--color-primary); font-weight: 800;">DEFAULT</span>
+          {% endif %}
+        </div>
+
+        <p style="font-size: 0.95rem; font-weight: 600; color: var(--color-text-main); margin-bottom: 0.25rem;">
+          {{ addr.line1 }}
+        </p>
+        {% if addr.line2 %}
+          <p style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">
+            {{ addr.line2 }}
+          </p>
+        {% endif %}
+        <p style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 1.25rem;">
+          {{ addr.city }}, {{ addr.state }} ({{ addr.country }})
+          {% if addr.postal_code %} • {{ addr.postal_code }}{% endif %}
+        </p>
+
+        <div style="margin-top: auto; display: flex; gap: 0.75rem; padding-top: 1rem; border-top: 1px solid var(--color-border);">
+          {% if not addr.is_default %}
+            <form action="{% url 'accounts:address-set-default' addr.pk %}" method="post" style="flex: 1;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline btn-sm btn-block">Set as Default</button>
+            </form>
+          {% endif %}
+          <form action="{% url 'accounts:address-delete' addr.pk %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline btn-sm" style="color: var(--color-danger); border-color: var(--color-danger);" onclick="return confirm('Delete this address?');">Delete</button>
+          </form>
+        </div>
+      </div>
+    {% empty %}
+      <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; background: var(--color-surface); border-radius: var(--radius-lg); border: 1px dashed var(--color-border);">
+        <p style="color: var(--color-text-muted); font-size: 1rem; margin-bottom: 1rem;">No saved addresses yet.</p>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Add New Address Form Section -->
+  <div id="newAddressSection" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: 2.5rem; max-width: 680px; box-shadow: var(--shadow-sm);">
+    <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem;">Add a New Delivery Address</h2>
+    <p style="font-size: 0.875rem; color: var(--color-text-muted); margin-bottom: 1.75rem;">Addresses are used to calculate accurate distance-based delivery fees and route riders.</p>
+
+    <form action="{% url 'accounts:addresses' %}" method="post">
+      {% csrf_token %}
+      
+      <div class="form-group">
+        <label class="form-label">Address Label *</label>
+        <input type="text" name="label" class="form-control" placeholder="e.g. Home, Office, Ridge Apartment" value="Home" required />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Street Address / Landmark *</label>
+        <input type="text" name="line1" class="form-control" placeholder="e.g. 14 Independence Avenue" required />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Apartment / Suite / Landmark (Optional)</label>
+        <input type="text" name="line2" class="form-control" placeholder="e.g. Floor 2, Near Ridge Hospital" />
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+        <div class="form-group">
+          <label class="form-label">City *</label>
+          <input type="text" name="city" class="form-control" value="Accra" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Region / State *</label>
+          <input type="text" name="state" class="form-control" value="Greater Accra" required />
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+        <div class="form-group">
+          <label class="form-label">Ghana Digital Postal Code</label>
+          <input type="text" name="postal_code" class="form-control" placeholder="e.g. GA-050-1234" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Country</label>
+          <input type="text" name="country" class="form-control" value="Ghana" readonly />
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+        <input type="checkbox" name="is_default" id="is_default_check" />
+        <label for="is_default_check" style="font-size: 0.875rem; font-weight: 600; cursor: pointer;">
+          Set as my default delivery address
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg">Save Delivery Address</button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

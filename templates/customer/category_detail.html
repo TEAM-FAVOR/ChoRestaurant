@@ -1,0 +1,105 @@
+{% extends 'customer/base.html' %}
+{% load static %}
+
+{% block title %}{{ category.name }} — {{ RESTAURANT_NAME|default:'Cho Restaurant' }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 3rem 1.5rem 5rem;">
+
+  <!-- Breadcrumbs -->
+  <div style="font-size: 0.85rem; color: var(--color-text-subtle); margin-bottom: 1.5rem;">
+    <a href="/" style="color: var(--color-text-muted);">Home</a>
+    <span style="margin: 0 0.4rem;">/</span>
+    <a href="{% url 'menu:menu-list' %}" style="color: var(--color-text-muted);">Menu</a>
+    <span style="margin: 0 0.4rem;">/</span>
+    <span style="color: var(--color-text-main); font-weight: 600;">{{ category.name }}</span>
+  </div>
+
+  <!-- Editorial Category Banner -->
+  <div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 1.75rem;">
+    <div>
+      <h1 style="font-family: var(--font-family-display); font-size: clamp(2.2rem, 4vw, 3rem); margin-bottom: 0.35rem;">
+        {{ category.name }}
+      </h1>
+      <p style="font-size: 1.05rem; color: var(--color-text-muted); max-width: 600px;">
+        {{ category.description|default:"Authentic freshly cooked meals crafted with passion and traditional spices." }}
+      </p>
+    </div>
+    <div>
+      <a href="{% url 'menu:menu-list' %}" class="btn btn-outline btn-sm">
+        &larr; View All Dishes
+      </a>
+    </div>
+  </div>
+
+  <!-- Food Items in this Category -->
+  <div class="editorial-food-grid">
+    {% for item in food_items %}
+      <div class="editorial-dish-card food-card" data-name="{{ item.name }}" data-category-slug="{{ category.slug }}">
+        <div class="dish-card-visual">
+          {% if "jollof" in item.slug %}
+            <img src="{% static 'img/dishes/jollof.svg' %}" alt="{{ item.name }}" />
+          {% elif "tilapia" in item.slug or "banku" in item.slug %}
+            <img src="{% static 'img/dishes/tilapia.svg' %}" alt="{{ item.name }}" />
+          {% elif "waakye" in item.slug %}
+            <img src="{% static 'img/dishes/waakye.svg' %}" alt="{{ item.name }}" />
+          {% elif "kelewele" in item.slug %}
+            <img src="{% static 'img/dishes/kelewele.svg' %}" alt="{{ item.name }}" />
+          {% elif "sobolo" in item.slug or "juice" in item.slug %}
+            <img src="{% static 'img/dishes/sobolo.svg' %}" alt="{{ item.name }}" />
+          {% elif item.image %}
+            <img src="{{ item.image.url }}" alt="{{ item.name }}" onerror="this.src='{% static 'img/dishes/default-dish.svg' %}'" />
+          {% else %}
+            <img src="{% static 'img/dishes/default-dish.svg' %}" alt="{{ item.name }}" />
+          {% endif %}
+        </div>
+
+        <div class="dish-card-body">
+          <div class="dish-header-row">
+            <h3 class="dish-title">
+              <a href="{% url 'menu:food-detail' item.slug %}">{{ item.name }}</a>
+            </h3>
+            <div class="dish-price-bold">
+              {{ CURRENCY_SYMBOL|default:'GH₵' }} {{ item.price }}
+            </div>
+          </div>
+
+          <p class="dish-sensory-desc">
+            {{ item.description|default:"Slow-cooked with authentic Ghanaian seasonings and served piping hot." }}
+          </p>
+
+          <div class="dish-card-action-row">
+            {% if item.is_available %}
+              <span class="dish-availability-tag avail">Available &bull; {{ item.prep_time_minutes }}m</span>
+              <button type="button" class="btn-add-minimal btn-add-to-cart"
+                data-id="{{ item.id }}"
+                data-name="{{ item.name }}"
+                data-price="{{ item.price }}"
+                data-category="{{ category.name }}"
+                data-prep="{{ item.prep_time_minutes }} mins"
+                {% if "jollof" in item.slug %}data-image="{% static 'img/dishes/jollof.svg' %}"
+                {% elif "tilapia" in item.slug %}data-image="{% static 'img/dishes/tilapia.svg' %}"
+                {% elif "waakye" in item.slug %}data-image="{% static 'img/dishes/waakye.svg' %}"
+                {% elif "kelewele" in item.slug %}data-image="{% static 'img/dishes/kelewele.svg' %}"
+                {% elif "sobolo" in item.slug %}data-image="{% static 'img/dishes/sobolo.svg' %}"
+                {% elif item.image %}data-image="{{ item.image.url }}"
+                {% else %}data-image="{% static 'img/dishes/default-dish.svg' %}"
+                {% endif %}>
+                + Add
+              </button>
+            {% else %}
+              <span class="dish-availability-tag sold-out">Sold Out</span>
+              <button type="button" class="btn-add-minimal" disabled style="opacity: 0.5;">
+                Unavailable
+              </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p style="grid-column: 1 / -1; text-align: center; color: var(--color-text-muted); padding: 3rem 0;">No dishes currently available in this category.</p>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

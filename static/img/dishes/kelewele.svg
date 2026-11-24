@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" fill="none">
+  <!-- Spicy Kelewele Bowl Visual -->
+  <defs>
+    <radialGradient id="bowlGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#475569" />
+      <stop offset="100%" stop-color="#1E293B" />
+    </radialGradient>
+    <linearGradient id="plantainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="50%" stop-color="#D97706" />
+      <stop offset="100%" stop-color="#78350F" />
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="#FFFBEB" />
+  <!-- Ceramic Dark Bowl -->
+  <ellipse cx="300" cy="220" rx="170" ry="110" fill="url(#bowlGrad)" stroke="#0F172A" stroke-width="4" />
+  <ellipse cx="300" cy="210" rx="150" ry="90" fill="#334155" />
+  
+  <!-- Diced Ripe Spiced Plantain Cubes -->
+  <g id="cubes">
+    <rect x="220" y="160" width="36" height="26" rx="6" fill="url(#plantainGrad)" transform="rotate(-12 220 160)" />
+    <rect x="270" y="150" width="40" height="28" rx="6" fill="url(#plantainGrad)" transform="rotate(18 270 150)" />
+    <rect x="330" y="155" width="38" height="25" rx="6" fill="url(#plantainGrad)" transform="rotate(-8 330 155)" />
+    <rect x="200" y="195" width="42" height="27" rx="6" fill="url(#plantainGrad)" transform="rotate(22 200 195)" />
+    <rect x="255" y="185" width="44" height="30" rx="7" fill="url(#plantainGrad)" transform="rotate(-5 255 185)" />
+    <rect x="315" y="190" width="40" height="28" rx="6" fill="url(#plantainGrad)" transform="rotate(15 315 190)" />
+    <rect x="365" y="190" width="36" height="24" rx="6" fill="url(#plantainGrad)" transform="rotate(-18 365 190)" />
+    <rect x="240" y="225" width="42" height="28" rx="6" fill="url(#plantainGrad)" transform="rotate(8 240 225)" />
+    <rect x="295" y="228" width="45" height="29" rx="7" fill="url(#plantainGrad)" transform="rotate(-14 295 228)" />
+  </g>
+  
+  <!-- Roasted Peanuts Scatter -->
+  <g fill="#FDE68A" stroke="#B45309" stroke-width="1.5">
+    <ellipse cx="190" cy="180" rx="8" ry="5" transform="rotate(30 190 180)" />
+    <ellipse cx="370" cy="170" rx="8" ry="5" transform="rotate(-25 370 170)" />
+    <ellipse cx="225" cy="255" rx="8" ry="5" transform="rotate(10 225 255)" />
+    <ellipse cx="360" cy="240" rx="8" ry="5" transform="rotate(45 360 240)" />
+    <ellipse cx="280" cy="210" rx="7" ry="4.5" transform="rotate(-40 280 210)" />
+    <ellipse cx="310" cy="175" rx="7" ry="4.5" transform="rotate(15 310 175)" />
+  </g>
+  
+  <!-- Ginger, Chili flakes & spices -->
+  <g fill="#DC2626">
+    <circle cx="265" cy="190" r="2.5" />
+    <circle cx="290" cy="200" r="2" />
+    <circle cx="340" cy="175" r="2.5" />
+    <circle cx="230" cy="215" r="2" />
+    <circle cx="310" cy="240" r="2.5" />
+  </g>
+</svg>
